@@ -159,6 +159,8 @@ class AudioRecorderController: UIViewController {
 		}
 	}
 	
+	// TODO: Ask for permission to use the microphone
+	// TODO: Know when the the recording finished, so that we can play it back
 	
 }
 
