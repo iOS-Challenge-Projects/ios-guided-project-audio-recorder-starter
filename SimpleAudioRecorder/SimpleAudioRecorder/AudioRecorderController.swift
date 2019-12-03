@@ -37,12 +37,13 @@ class AudioRecorderController: UIViewController {
 		super.viewDidLoad()
 
 
-        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeLabel.font.pointSize,
-                                                          weight: .regular)
-        timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
-                                                                   weight: .regular)
+		timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeLabel.font.pointSize,
+														  weight: .regular)
+		timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
+																   weight: .regular)
 		
 		loadAudio()
+		updateViews()
 	}
 	
 	private func loadAudio() {
@@ -72,12 +73,28 @@ class AudioRecorderController: UIViewController {
 
 	func play() {
 		audioPlayer?.play()
+		startTimer()
+		updateViews()
+	}
+
+	private func startTimer() {
+		cancelTimer()
+		timer = Timer.scheduledTimer(timeInterval: 0.03, target: self, selector: #selector(updateTimer(timer:)), userInfo: nil, repeats: true)
+	}
+
+	@objc private func updateTimer(timer: Timer) {
 		updateViews()
 	}
 
 	func pause() {
 		audioPlayer?.pause()
+		cancelTimer()
 		updateViews()
+	}
+
+	private func cancelTimer() {
+		timer?.invalidate()
+		timer = nil
 	}
 
 	func playPause() {
@@ -94,8 +111,11 @@ class AudioRecorderController: UIViewController {
 		playButton.setTitle(playButtonTitle, for: .normal)
 		
 		let elapsedTime = audioPlayer?.currentTime ?? 0
-		timeLabel.text = "\(elapsedTime)"
+		timeLabel.text = timeFormatter.string(from: elapsedTime)
 		
+		timeSlider.minimumValue = 0
+		timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
+		timeSlider.value = Float(elapsedTime)
 	}
     
     @IBAction func recordButtonPressed(_ sender: Any) {
@@ -112,6 +132,7 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
 		}
 	}
 	
+	// TODO: Cancel timer?
 	func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
 		updateViews()	// TODO: is this on the main thread?
 	}
