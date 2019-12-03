@@ -116,6 +116,9 @@ class AudioRecorderController: UIViewController {
 		timeSlider.minimumValue = 0
 		timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
 		timeSlider.value = Float(elapsedTime)
+		
+		let recordButtonTitle = isRecording ? "Stop Recording" : "Record"
+		recordButton.setTitle(recordButtonTitle, for: .normal)
 	}
     
 	@IBAction func recordButtonPressed(_ sender: Any) {
@@ -124,6 +127,8 @@ class AudioRecorderController: UIViewController {
 
 	// Record
 
+	var recordURL: URL?
+	
 	var isRecording: Bool {
 		return audioRecorder?.isRecording ?? false
 	}
@@ -143,12 +148,16 @@ class AudioRecorderController: UIViewController {
 		let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
 		
 		audioRecorder = try! AVAudioRecorder(url: file, format: format) // FIXME: error handling
+		recordURL = file
+		audioRecorder?.delegate = self
 		audioRecorder?.record()
+		updateViews()
 	}
 
 	func stopRecording() {
 		audioRecorder?.stop()
 		audioRecorder = nil
+		updateViews()
 	}
 
 	func recordToggle() {
@@ -158,10 +167,6 @@ class AudioRecorderController: UIViewController {
 			record()
 		}
 	}
-	
-	// TODO: Ask for permission to use the microphone
-	// TODO: Know when the the recording finished, so that we can play it back
-	
 }
 
 extension AudioRecorderController: AVAudioPlayerDelegate {
@@ -174,5 +179,22 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
 	// TODO: Cancel timer?
 	func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
 		updateViews()	// TODO: is this on the main thread?
+	}
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+	func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+		if let error = error {
+			print("Record error: \(error)")
+		}
+	}
+	
+	func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+		print("Recording finished")
+		// TODO: Create player with new file URL
+		
+		if let recordURL = recordURL {
+			audioPlayer = try! AVAudioPlayer(contentsOf: recordURL) // FIXME: make safer
+		}
 	}
 }
