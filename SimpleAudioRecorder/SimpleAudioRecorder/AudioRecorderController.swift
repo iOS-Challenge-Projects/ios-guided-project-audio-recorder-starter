@@ -54,6 +54,7 @@ class AudioRecorderController: UIViewController {
 		
 		// create the player
 		audioPlayer = try! AVAudioPlayer(contentsOf: songURL) // RISKY: will crash if not there
+		audioPlayer?.delegate = self
 	}
 	
 	@IBAction func playButtonPressed(_ sender: Any) {
@@ -63,16 +64,20 @@ class AudioRecorderController: UIViewController {
 	// Playback
 	// What functions do I need?
 
+	var timer: Timer?
+	
 	var isPlaying: Bool {
 		audioPlayer?.isPlaying ?? false
 	}
 
 	func play() {
 		audioPlayer?.play()
+		updateViews()
 	}
 
 	func pause() {
 		audioPlayer?.pause()
+		updateViews()
 	}
 
 	func playPause() {
@@ -84,7 +89,14 @@ class AudioRecorderController: UIViewController {
 	}
 
 	/// TODO: Update the UI for the playback
-	
+	private func updateViews() {
+		let playButtonTitle = isPlaying ? "Pause" : "Play"
+		playButton.setTitle(playButtonTitle, for: .normal)
+		
+		let elapsedTime = audioPlayer?.currentTime ?? 0
+		timeLabel.text = "\(elapsedTime)"
+		
+	}
     
     @IBAction func recordButtonPressed(_ sender: Any) {
     
@@ -93,3 +105,14 @@ class AudioRecorderController: UIViewController {
 	
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+	func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+		if let error = error {
+			print("Audio playback error: \(error)")
+		}
+	}
+	
+	func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+		updateViews()	// TODO: is this on the main thread?
+	}
+}
