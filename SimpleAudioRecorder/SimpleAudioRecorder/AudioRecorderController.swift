@@ -38,6 +38,7 @@ class AudioRecorderController: UIViewController {
 		
 		
 		loadAudio()
+		updateViews()
 	}
 
 	// Playback APIs
@@ -62,6 +63,7 @@ class AudioRecorderController: UIViewController {
 		let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
 		
 		audioPlayer = try! AVAudioPlayer(contentsOf: songURL) // FIXME: catch error and print
+		audioPlayer?.delegate = self
 	}
 	
 	var isPlaying: Bool {
@@ -90,6 +92,8 @@ class AudioRecorderController: UIViewController {
 
 	private func startTimer() {
 		cancelTimer()
+		// 0.01s = faster update
+		// 1s = slow update
 		timer = Timer.scheduledTimer(timeInterval: 0.03, target: self, selector: #selector(updateTimer(timer:)), userInfo: nil, repeats: true)
 	}
 
@@ -120,6 +124,22 @@ class AudioRecorderController: UIViewController {
 		
 		let elapsedTime = audioPlayer?.currentTime ?? 0
 		timeLabel.text = timeFormatter.string(from: elapsedTime)
+		
+		timeSlider.minimumValue = 0
+		timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
+		timeSlider.value = Float(elapsedTime)
 	}
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+
+	func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+		updateViews()
+	}
+
+	func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+		if let error = error {
+			print("Audio Player error: \(error)")
+		}
+	}
+}
