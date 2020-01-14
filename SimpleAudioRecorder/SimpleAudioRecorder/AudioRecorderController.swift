@@ -113,10 +113,42 @@ class AudioRecorderController: UIViewController {
 	
 	// Record APIs
 
-    
-    @IBAction func recordButtonPressed(_ sender: Any) {
-    
-    }
+	var audioRecorder: AVAudioRecorder?
+
+	var isRecording: Bool {
+		return audioRecorder?.isRecording ?? false
+	}
+
+	func record() {
+		let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+		
+		let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: [.withInternetDateTime])
+		let file = documents.appendingPathComponent(name).appendingPathExtension("caf")
+		
+		print("record: \(file)")
+		
+		// 44.1 KHz 44,100 samples per second, 1 microphone
+		let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)! // FIXME: error handling
+		
+		audioRecorder = try! AVAudioRecorder(url: file, format: format) // FIXME: try!
+	}
+
+	func stop() {
+		audioRecorder?.stop()
+		audioRecorder = nil
+	}
+
+	func recordToggle() {
+		if isRecording {
+			stop()
+		} else {
+			record()
+		}
+	}
+
+	@IBAction func recordButtonPressed(_ sender: Any) {
+		recordToggle()
+	}
 	
 	private func updateViews() {
 		let playButtonTitle = isPlaying ? "Pause" : "Play" // Pause or Play
