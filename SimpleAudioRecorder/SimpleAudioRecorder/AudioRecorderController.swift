@@ -114,7 +114,8 @@ class AudioRecorderController: UIViewController {
 	// Record APIs
 
 	var audioRecorder: AVAudioRecorder?
-
+	var recordURL: URL?
+	
 	var isRecording: Bool {
 		return audioRecorder?.isRecording ?? false
 	}
@@ -124,6 +125,7 @@ class AudioRecorderController: UIViewController {
 		
 		let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: [.withInternetDateTime])
 		let file = documents.appendingPathComponent(name).appendingPathExtension("caf")
+		recordURL = file
 		
 		print("record: \(file)")
 		
@@ -131,11 +133,15 @@ class AudioRecorderController: UIViewController {
 		let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)! // FIXME: error handling
 		
 		audioRecorder = try! AVAudioRecorder(url: file, format: format) // FIXME: try!
+		audioRecorder?.delegate = self
+		audioRecorder?.record()
+		updateViews()
 	}
 
 	func stop() {
 		audioRecorder?.stop()
 		audioRecorder = nil
+		updateViews()
 	}
 
 	func recordToggle() {
@@ -160,6 +166,9 @@ class AudioRecorderController: UIViewController {
 		timeSlider.minimumValue = 0
 		timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
 		timeSlider.value = Float(elapsedTime)
+		
+		let recordButtonTitle = isRecording ? "Stop" : "Record"
+		recordButton.setTitle(recordButtonTitle, for: .normal)
 	}
 }
 
@@ -172,6 +181,27 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
 	func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
 		if let error = error {
 			print("Audio Player error: \(error)")
+		}
+	}
+}
+
+// TODO: Get permission to record audio
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+	
+	func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+		if let error = error {
+			print("Audio recorder error: \(error)")
+		}
+	}
+	
+	func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+		
+		// TODO: Update player to load our audio file
+		
+		print("Finished Recording")
+		if let recordURL = recordURL {
+			audioPlayer = try! AVAudioPlayer(contentsOf: recordURL) // FIXME: handle errors
 		}
 	}
 }
