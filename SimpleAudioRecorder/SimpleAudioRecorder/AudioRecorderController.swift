@@ -7,9 +7,12 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
+	var audioPlayer: AVAudioPlayer?
+	
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var timeLabel: UILabel!
@@ -34,12 +37,58 @@ class AudioRecorderController: UIViewController {
                                                           weight: .regular)
         timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
                                                                    weight: .regular)
+		
+		
+		loadAudio()
 	}
 
-
-    @IBAction func playButtonPressed(_ sender: Any) {
-
+	// Playback APIs
+	
+	// What are function names I need?
+	
+	// - get audio file
+	// - play
+	// - pause
+	// - timestamp (current time?)
+	// - is it playing?
+	
+	private func loadAudio() {
+		// piano.mp3
+		// App Bundle - readonly
+		// Documents - readwrite
+		
+		// force unwrap is ok for demo/prototypes, but it's not safe for production
+		let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
+		
+		audioPlayer = try! AVAudioPlayer(contentsOf: songURL) // FIXME: catch error and print
 	}
+	
+	var isPlaying: Bool {
+		audioPlayer?.isPlaying ?? false
+	}
+
+	func play() {
+		audioPlayer?.play()
+	}
+
+	func pause() {
+		audioPlayer?.pause()
+	}
+
+	func playPause() {
+		if isPlaying {
+			pause()
+		} else {
+			play()
+		}
+	}
+
+	@IBAction func playButtonPressed(_ sender: Any) {
+		playPause()
+	}
+	
+	// Record APIs
+
     
     @IBAction func recordButtonPressed(_ sender: Any) {
     
