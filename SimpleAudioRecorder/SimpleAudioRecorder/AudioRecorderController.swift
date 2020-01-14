@@ -10,9 +10,7 @@ import UIKit
 import AVFoundation
 
 class AudioRecorderController: UIViewController {
-    
-	var audioPlayer: AVAudioPlayer?
-	
+    	
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var timeLabel: UILabel!
@@ -51,6 +49,9 @@ class AudioRecorderController: UIViewController {
 	// - pause
 	// - timestamp (current time?)
 	// - is it playing?
+	var audioPlayer: AVAudioPlayer?
+
+	var timer: Timer?
 	
 	private func loadAudio() {
 		// piano.mp3
@@ -69,10 +70,14 @@ class AudioRecorderController: UIViewController {
 
 	func play() {
 		audioPlayer?.play()
+		updateViews()
+		startTimer()
 	}
 
 	func pause() {
 		audioPlayer?.pause()
+		updateViews()
+		cancelTimer()
 	}
 
 	func playPause() {
@@ -82,6 +87,21 @@ class AudioRecorderController: UIViewController {
 			play()
 		}
 	}
+
+	private func startTimer() {
+		cancelTimer()
+		timer = Timer.scheduledTimer(timeInterval: 0.03, target: self, selector: #selector(updateTimer(timer:)), userInfo: nil, repeats: true)
+	}
+
+	@objc private func updateTimer(timer: Timer) {
+		updateViews()
+	}
+
+	private func cancelTimer() {
+		timer?.invalidate()
+		timer = nil
+	}
+	
 
 	@IBAction func playButtonPressed(_ sender: Any) {
 		playPause()
@@ -93,5 +113,13 @@ class AudioRecorderController: UIViewController {
     @IBAction func recordButtonPressed(_ sender: Any) {
     
     }
+	
+	private func updateViews() {
+		let playButtonTitle = isPlaying ? "Pause" : "Play" // Pause or Play
+		playButton.setTitle(playButtonTitle, for: .normal)
+		
+		let elapsedTime = audioPlayer?.currentTime ?? 0
+		timeLabel.text = timeFormatter.string(from: elapsedTime)
+	}
 }
 
