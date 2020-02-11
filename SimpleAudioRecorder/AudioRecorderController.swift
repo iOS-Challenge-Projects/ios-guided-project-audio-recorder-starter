@@ -48,6 +48,7 @@ class AudioRecorderController: UIViewController {
         updateViews()
     }
 
+    // Called anytime this class is cleaned up (Nav controller, tab controller, table view)
     deinit {
         stopTimer()
     }
@@ -68,6 +69,7 @@ class AudioRecorderController: UIViewController {
         let timeRemaining = (audioPlayer?.duration ?? 0) - elapsedTime
         timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
         
+        // TODO: Deal with time rounding up/down between both time labels
     }
 
     // MARK: - Playback
@@ -77,15 +79,22 @@ class AudioRecorderController: UIViewController {
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!  // programmer error if this fails to load
         
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)  // FIXME: use better error handling
+        audioPlayer?.isMeteringEnabled = true
         audioPlayer?.delegate = self
     }
-    
+
     func startTimer() {
         // timers are automatically registered on run loop, so we need to cancel before adding a new one
         stopTimer()
         // Call every 30 ms (10-30)
         timer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true, block: { [weak self] (timer) in
-            self?.updateViews()
+            guard let self = self,
+                let audioPlayer = self.audioPlayer else { return }
+            
+            self.updateViews()
+            
+            self.audioPlayer?.updateMeters()
+            self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
         })
     }
     
