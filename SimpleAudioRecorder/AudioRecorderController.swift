@@ -46,6 +46,9 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
 
+    private func updateViews() {
+        playButton.isSelected = isPlaying
+    }
 
     // MARK: - Playback
 
@@ -54,6 +57,7 @@ class AudioRecorderController: UIViewController {
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!  // programmer error if this fails to load
         
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)  // FIXME: use better error handling
+        audioPlayer?.delegate = self
     }
     
     // What do I want to do?
@@ -68,10 +72,12 @@ class AudioRecorderController: UIViewController {
 
     func play() {
         audioPlayer?.play()
+        updateViews()
     }
 
     func pause() {
         audioPlayer?.pause()
+        updateViews()
     }
 
     func playPause() {
@@ -102,3 +108,15 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        updateViews()
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("AudioPlayer Error: \(error)")
+        }
+    }
+}
