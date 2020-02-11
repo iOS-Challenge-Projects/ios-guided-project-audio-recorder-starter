@@ -12,6 +12,9 @@ import AVFoundation
 class AudioRecorderController: UIViewController {
     
     var audioPlayer: AVAudioPlayer?
+    var audioRecorder: AVAudioRecorder?
+    var recordingURL: URL?
+    
     var timer: Timer?
     
     @IBOutlet weak var playButton: UIButton!
@@ -56,6 +59,7 @@ class AudioRecorderController: UIViewController {
     // call this code using a Timer
     private func updateViews() {
         playButton.isSelected = isPlaying
+        recordButton.isSelected = isRecording
         
         // update time (currentTime)
 
@@ -70,6 +74,7 @@ class AudioRecorderController: UIViewController {
         timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
         
         // TODO: Deal with time rounding up/down between both time labels
+        
     }
 
     // MARK: - Playback
@@ -136,6 +141,57 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Recording
     
+    var isRecording: Bool {
+        audioRecorder?.isRecording ?? false
+    }
+
+    func startRecording() {
+        recordingURL = makeNewRecordingURL()
+        if let recordingURL = recordingURL {
+            print("URL: \(recordingURL)")
+            
+            // 44.1 KHz = FM quality audio
+            let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)! // FIXME: can fail
+            
+            audioRecorder = try! AVAudioRecorder(url: recordingURL, format: format) // FIXME: Deal with errors fatalError()
+            audioRecorder?.record()
+            audioRecorder?.delegate = self
+            updateViews()
+        }
+    }
+    
+    func requestRecordPermission() {
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            DispatchQueue.main.async {
+                guard granted == true else {
+                    fatalError("We need microphone access")
+                }
+                self.startRecording()
+            }
+        }
+    }
+
+    func stopRecording() {
+        audioRecorder?.stop()
+        updateViews()
+    }
+
+    func toggleRecording() {
+        if isRecording {
+           stopRecording()
+        } else {
+           requestRecordPermission()
+        }
+    }
+    
+    func makeNewRecordingURL() -> URL {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        
+        // 2020-01-18T23/10/40-08/00.caf
+        let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: [.withInternetDateTime])
+        let url = documents.appendingPathComponent(name).appendingPathExtension("caf")
+        return url
+    }
     
     
     // MARK: - Actions
@@ -149,7 +205,7 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
-        
+        toggleRecording()
     }
 }
 
@@ -163,6 +219,25 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let error = error {
             print("AudioPlayer Error: \(error)")
+        }
+    }
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+    
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if flag == true {
+            // update player to load the new file
+            
+            if let recordingURL = recordingURL {
+                audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL)
+            }
+        }
+    }
+    
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        if let error = error {
+            print("AudioRecorder error: \(error)")
         }
     }
 }
