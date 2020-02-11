@@ -93,13 +93,19 @@ class AudioRecorderController: UIViewController {
         stopTimer()
         // Call every 30 ms (10-30)
         timer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true, block: { [weak self] (timer) in
-            guard let self = self,
-                let audioPlayer = self.audioPlayer else { return }
+            guard let self = self else { return }
             
             self.updateViews()
             
-            self.audioPlayer?.updateMeters()
-            self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
+            if let audioPlayer = self.audioPlayer {
+                audioPlayer.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
+            }
+            
+            if let audioRecorder = self.audioRecorder {
+                audioRecorder.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+            }
         })
     }
     
@@ -156,7 +162,9 @@ class AudioRecorderController: UIViewController {
             audioRecorder = try! AVAudioRecorder(url: recordingURL, format: format) // FIXME: Deal with errors fatalError()
             audioRecorder?.record()
             audioRecorder?.delegate = self
+            audioRecorder?.isMeteringEnabled = true
             updateViews()
+            startTimer()
         }
     }
     
@@ -174,6 +182,7 @@ class AudioRecorderController: UIViewController {
     func stopRecording() {
         audioRecorder?.stop()
         updateViews()
+        stopTimer()
     }
 
     func toggleRecording() {
@@ -231,6 +240,7 @@ extension AudioRecorderController: AVAudioRecorderDelegate {
             
             if let recordingURL = recordingURL {
                 audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL)
+                audioPlayer?.isMeteringEnabled = true
             }
         }
     }
