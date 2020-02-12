@@ -66,15 +66,13 @@ class AudioRecorderController: UIViewController {
         let elapsedTime = audioPlayer?.currentTime ?? 0
         timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
         
+        
         timeSlider.value = Float(elapsedTime)
         timeSlider.minimumValue = 0
         timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
-        
-        let timeRemaining = (audioPlayer?.duration ?? 0) - elapsedTime
-        timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
-        
-        // TODO: Deal with time rounding up/down between both time labels
-        
+        let duration = audioPlayer?.duration ?? 0
+        let timeRemaining = duration.rounded() - elapsedTime
+        timeRemainingLabel.text = "-" + timeIntervalFormatter.string(from: timeRemaining)!
     }
 
     // MARK: - Playback
@@ -83,7 +81,11 @@ class AudioRecorderController: UIViewController {
         // app bundle is readonly folder
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!  // programmer error if this fails to load
         
-        audioPlayer = try? AVAudioPlayer(contentsOf: songURL)  // FIXME: use better error handling
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: songURL)
+        } catch {
+            fatalError("Failed to load audio file: \(error)")
+        }
         audioPlayer?.isMeteringEnabled = true
         audioPlayer?.delegate = self
     }
@@ -97,29 +99,26 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-            if let audioPlayer = self.audioPlayer {
-                audioPlayer.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
-            }
             
-            if let audioRecorder = self.audioRecorder {
+            if let audioRecorder = self.audioRecorder,
+                self.isRecording == true {
                 audioRecorder.updateMeters()
                 self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+            }
+
+            if let audioPlayer = self.audioPlayer,
+                self.isPlaying == true {
+                audioPlayer.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
             }
         })
     }
     
-    // Where should I call stop timer?
     func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
-    // What do I want to do?
-    // pause it
-    // volume
-    // restart the audio
-    // update the time/labels
-
+    
     var isPlaying: Bool {
         audioPlayer?.isPlaying ?? false
     }
@@ -168,17 +167,6 @@ class AudioRecorderController: UIViewController {
         }
     }
     
-    func requestRecordPermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            DispatchQueue.main.async {
-                guard granted == true else {
-                    fatalError("We need microphone access")
-                }
-                self.startRecording()
-            }
-        }
-    }
-
     func stopRecording() {
         audioRecorder?.stop()
         updateViews()
@@ -189,7 +177,20 @@ class AudioRecorderController: UIViewController {
         if isRecording {
            stopRecording()
         } else {
-           requestRecordPermission()
+            recordOrRequestPermission()
+        }
+    }
+
+    func recordOrRequestPermission() {
+        if AVAudioSession.sharedInstance().recordPermission == .granted {
+            startRecording()
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                guard granted == true else { fatalError("We need microphone access") }
+                
+                print("record permissions granted")
+                // NOTE: Probably want the user to tap record again, since we just interrupted them, and they may not be ready to record
+            }
         }
     }
     
@@ -199,6 +200,7 @@ class AudioRecorderController: UIViewController {
         // 2020-01-18T23/10/40-08/00.caf
         let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: [.withInternetDateTime])
         let url = documents.appendingPathComponent(name).appendingPathExtension("caf")
+        print("Recording URL: \(url.path)")
         return url
     }
     
@@ -210,7 +212,12 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
+        if isPlaying {
+            pause()
+        }
         
+        audioPlayer?.currentTime = TimeInterval(timeSlider.value)
+        updateViews()
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
