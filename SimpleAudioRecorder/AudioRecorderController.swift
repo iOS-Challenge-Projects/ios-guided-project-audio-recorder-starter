@@ -65,6 +65,7 @@ class AudioRecorderController: UIViewController {
     // Question: When do you call updateViews?
     func updateViews() {
         playButton.isSelected = isPlaying
+        recordButton.isSelected = isRecording
         
         let elapsedTime = audioPlayer?.currentTime ?? 0
         let duration = audioPlayer?.duration ?? 0
@@ -85,13 +86,13 @@ class AudioRecorderController: UIViewController {
             guard let self = self else { return }
             self.updateViews()
             
-    //            if let audioRecorder = self.audioRecorder,
-    //                self.isRecording == true {
-    //
-    //                audioRecorder.updateMeters()
-    //                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-    //
-    //            }
+            if let audioRecorder = self.audioRecorder,
+                self.isRecording == true {
+
+                audioRecorder.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+
+            }
             
             if let audioPlayer = self.audioPlayer,
                 self.isPlaying == true {
@@ -207,10 +208,12 @@ class AudioRecorderController: UIViewController {
         audioRecorder?.delegate = self
         
         self.recordingURL = recordingURL
+        updateViews()
     }
 
     func stopRecording() {
         audioRecorder?.stop()
+        updateViews()
     }
     
     // MARK: - Actions
