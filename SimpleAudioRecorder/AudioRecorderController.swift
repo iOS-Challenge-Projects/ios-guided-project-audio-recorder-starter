@@ -46,6 +46,10 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
     
+    // Question: When do you call updateViews?
+    func updateViews() {
+        playButton.isSelected = isPlaying
+    }
     
     // MARK: - Timer
     
@@ -110,10 +114,12 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        updateViews()
     }
 
     func pause() {
         audioPlayer?.pause()
+        updateViews()
     }
     
     
