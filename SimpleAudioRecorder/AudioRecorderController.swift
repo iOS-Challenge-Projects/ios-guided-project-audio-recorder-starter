@@ -16,6 +16,7 @@ class AudioRecorderController: UIViewController {
             guard let audioPlayer = audioPlayer else { return }
             
             audioPlayer.delegate = self
+            audioPlayer.isMeteringEnabled = true
         }
     }
     
@@ -205,6 +206,7 @@ class AudioRecorderController: UIViewController {
         audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format)
         audioRecorder?.record()
         audioRecorder?.delegate = self
+        audioRecorder?.isMeteringEnabled = true
         
         self.recordingURL = recordingURL
         updateViews()
