@@ -56,6 +56,7 @@ class AudioRecorderController: UIViewController {
         
         loadAudio()
         updateViews()
+        try? prepareAudioSession() // TODO: fix error handling
     }
     
     deinit {
@@ -126,15 +127,15 @@ class AudioRecorderController: UIViewController {
         // FIXME: Use error handling to print out messages
     }
     
-    /*
+    
+    // If you don't set active, on a device record won't work the first time (or other strange
+    // behavior)
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
         try session.setActive(true, options: []) // can fail if on a phone call, for instance
     }
-    */
-    
-    
+
     func play() {
         audioPlayer?.play()
         startTimer()
@@ -165,13 +166,12 @@ class AudioRecorderController: UIViewController {
         return file
     }
     
-    /*
     func requestPermissionOrStartRecording() {
         switch AVAudioSession.sharedInstance().recordPermission {
         case .undetermined:
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 guard granted == true else {
-                    print("We need microphone access")
+                    print("We need microphone access") // Privacy for Microphone denied
                     return
                 }
                 
@@ -196,7 +196,6 @@ class AudioRecorderController: UIViewController {
             break
         }
     }
-    */
     
     func startRecording() {
         // 44.1 kHz
@@ -235,7 +234,7 @@ class AudioRecorderController: UIViewController {
         if isRecording {
             stopRecording()
         } else {
-            startRecording()
+            requestPermissionOrStartRecording()
         }
     }
 }
