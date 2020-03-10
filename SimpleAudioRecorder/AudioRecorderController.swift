@@ -19,6 +19,8 @@ class AudioRecorderController: UIViewController {
         }
     }
     
+    var timer: Timer?
+    
     @IBOutlet var playButton: UIButton!
     @IBOutlet var recordButton: UIButton!
     @IBOutlet var timeElapsedLabel: UILabel!
@@ -52,29 +54,36 @@ class AudioRecorderController: UIViewController {
         loadAudio()
     }
     
+    deinit {
+        cancelTimer()
+    }
+    
     // Question: When do you call updateViews?
     func updateViews() {
         playButton.isSelected = isPlaying
+        
+        let elapsedTime = audioPlayer?.currentTime ?? 0
+        
+        timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
     }
     
     // MARK: - Timer
     
-    /*
     func startTimer() {
         timer?.invalidate()
         
         timer = Timer.scheduledTimer(withTimeInterval: 0.030, repeats: true) { [weak self] (_) in
             guard let self = self else { return }
-            
+            print("updateTimer")
             self.updateViews()
             
-            if let audioRecorder = self.audioRecorder,
-                self.isRecording == true {
-                
-                audioRecorder.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-                
-            }
+    //            if let audioRecorder = self.audioRecorder,
+    //                self.isRecording == true {
+    //
+    //                audioRecorder.updateMeters()
+    //                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+    //
+    //            }
             
             if let audioPlayer = self.audioPlayer,
                 self.isPlaying == true {
@@ -84,12 +93,11 @@ class AudioRecorderController: UIViewController {
             }
         }
     }
-    
+
     func cancelTimer() {
         timer?.invalidate()
         timer = nil
     }
-    */
     
     
     // MARK: - Playback
@@ -120,14 +128,16 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        startTimer()
         updateViews()
     }
 
     func pause() {
         audioPlayer?.pause()
+        cancelTimer()
         updateViews()
     }
-    
+
     
     // MARK: - Recording
     
@@ -207,14 +217,15 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         // QUESTION: what should we do?
         print("audioPlayerDidFinishPlaying.flag = \(flag)")
-        if flag { // if flag == true
-            updateViews()
-        }
+        cancelTimer()
+        updateViews()
     }
     
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let error = error {
             print("Error decoding audio: \(error)")
         }
+        cancelTimer()
+        updateViews()
     }
 }
