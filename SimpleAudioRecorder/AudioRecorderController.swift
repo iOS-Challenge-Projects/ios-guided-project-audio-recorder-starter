@@ -72,7 +72,12 @@ class AudioRecorderController: UIViewController {
         let elapsedTime = audioPlayer?.currentTime ?? 0
         let duration = audioPlayer?.duration ?? 0
         
+        // Round the time remaining to prevent the labels from updating at different times because
+        // of how rounding works with the time formatter (00:01)
+        let timeRemaining = duration.rounded() - elapsedTime
+        
         timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
+        timeRemainingLabel.text = timeIntervalFormatter.string(from: timeRemaining)
         
         timeSlider.value = Float(elapsedTime)
         timeSlider.minimumValue = 0
