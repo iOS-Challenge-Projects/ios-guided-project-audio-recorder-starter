@@ -19,6 +19,9 @@ class AudioRecorderController: UIViewController {
         }
     }
     
+    var audioRecorder: AVAudioRecorder?
+    var recordingURL: URL?
+    
     var timer: Timer?
     
     @IBOutlet var playButton: UIButton!
@@ -145,6 +148,10 @@ class AudioRecorderController: UIViewController {
 
     
     // MARK: - Recording
+
+    var isRecording: Bool {
+        return audioRecorder?.isRecording ?? false
+    }
     
     func createNewRecordingURL() -> URL {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -152,7 +159,7 @@ class AudioRecorderController: UIViewController {
         let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: .withInternetDateTime)
         let file = documents.appendingPathComponent(name, isDirectory: false).appendingPathExtension("caf")
         
-//        print("recording URL: \(file)")
+        print("recording URL: \(file)")
         
         return file
     }
@@ -191,11 +198,19 @@ class AudioRecorderController: UIViewController {
     */
     
     func startRecording() {
+        // 44.1 kHz
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
         
+        let recordingURL = createNewRecordingURL()
+        audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format)
+        audioRecorder?.record()
+        audioRecorder?.delegate = self
+        
+        self.recordingURL = recordingURL
     }
-    
+
     func stopRecording() {
-        
+        audioRecorder?.stop()
     }
     
     // MARK: - Actions
@@ -214,7 +229,11 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
-        
+        if isRecording {
+            stopRecording()
+        } else {
+            startRecording()
+        }
     }
 }
 
@@ -231,6 +250,23 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
             print("Error decoding audio: \(error)")
         }
         cancelTimer()
+        updateViews()
+    }
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        // Play the recorded file (instead of our piano music)
+        guard let recordingURL = recordingURL else { return }
+            
+        audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL) // TODO: handle error
+        updateViews()
+    }
+    
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        if let error = error {
+            print("Error recording: \(error)")
+        }
         updateViews()
     }
 }
