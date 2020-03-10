@@ -8,13 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		874D724823D1537A006F83B9 /* AudioVisualizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874D724723D1537A006F83B9 /* AudioVisualizer.swift */; };
+		BD0745322417F41B005A78A9 /* piano.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4BA52343ECF5001432F7 /* piano.mp3 */; };
 		BD8D4B6A2343EB1D001432F7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8D4B692343EB1D001432F7 /* AppDelegate.swift */; };
 		BD8D4B6C2343EB1D001432F7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8D4B6B2343EB1D001432F7 /* SceneDelegate.swift */; };
 		BD8D4B732343EB1E001432F7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4B722343EB1E001432F7 /* Assets.xcassets */; };
 		BD8D4B762343EB1E001432F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4B742343EB1E001432F7 /* LaunchScreen.storyboard */; };
 		BD8D4B7F2343EB38001432F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4B7D2343EB38001432F7 /* Main.storyboard */; };
 		BD8D4B802343EB38001432F7 /* AudioRecorderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8D4B7E2343EB38001432F7 /* AudioRecorderController.swift */; };
-		BD8D4BA62343ECF5001432F7 /* piano.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4BA52343ECF5001432F7 /* piano.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -133,7 +133,7 @@
 			files = (
 				BD8D4B7F2343EB38001432F7 /* Main.storyboard in Resources */,
 				BD8D4B762343EB1E001432F7 /* LaunchScreen.storyboard in Resources */,
-				BD8D4BA62343ECF5001432F7 /* piano.mp3 in Resources */,
+				BD0745322417F41B005A78A9 /* piano.mp3 in Resources */,
 				BD8D4B732343EB1E001432F7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -291,7 +291,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.lambdaschool.SimpleAudioRecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lambdaschool.SimpleAudioRecorder-iOS13";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -309,7 +309,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.lambdaschool.SimpleAudioRecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lambdaschool.SimpleAudioRecorder-iOS13";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
