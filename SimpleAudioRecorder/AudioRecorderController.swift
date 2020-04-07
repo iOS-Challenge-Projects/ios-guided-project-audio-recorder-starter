@@ -18,6 +18,7 @@ class AudioRecorderController: UIViewController {
     var audioPlayer: AVAudioPlayer? {
         didSet {
             audioPlayer?.delegate = self
+            audioPlayer?.isMeteringEnabled = true
         }
     }
     
@@ -55,6 +56,7 @@ class AudioRecorderController: UIViewController {
         
         loadAudio()
         updateViews()
+        try? prepareAudioSession() // FIXME: handle error
     }
     
     func updateViews() {
@@ -115,14 +117,12 @@ class AudioRecorderController: UIViewController {
         
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
     }
-    
-    /*
+
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
         try session.setActive(true, options: []) // can fail if on a phone call, for instance
     }
-    */
     
     func play() {
         audioPlayer?.play()
