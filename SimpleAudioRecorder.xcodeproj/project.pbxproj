@@ -14,7 +14,7 @@
 		BD8D4B762343EB1E001432F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4B742343EB1E001432F7 /* LaunchScreen.storyboard */; };
 		BD8D4B7F2343EB38001432F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4B7D2343EB38001432F7 /* Main.storyboard */; };
 		BD8D4B802343EB38001432F7 /* AudioRecorderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD8D4B7E2343EB38001432F7 /* AudioRecorderController.swift */; };
-		BD8D4BA62343ECF5001432F7 /* piano.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4BA52343ECF5001432F7 /* piano.mp3 */; };
+		BDA042EA243CE1FC003525C9 /* piano.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BD8D4BA52343ECF5001432F7 /* piano.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -133,7 +133,7 @@
 			files = (
 				BD8D4B7F2343EB38001432F7 /* Main.storyboard in Resources */,
 				BD8D4B762343EB1E001432F7 /* LaunchScreen.storyboard in Resources */,
-				BD8D4BA62343ECF5001432F7 /* piano.mp3 in Resources */,
+				BDA042EA243CE1FC003525C9 /* piano.mp3 in Resources */,
 				BD8D4B732343EB1E001432F7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

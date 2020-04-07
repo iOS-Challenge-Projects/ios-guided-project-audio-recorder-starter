@@ -7,15 +7,15 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
-    @IBOutlet var playButton: UIButton!
-    @IBOutlet var recordButton: UIButton!
-    @IBOutlet var timeElapsedLabel: UILabel!
-    @IBOutlet var timeRemainingLabel: UILabel!
-    @IBOutlet var timeSlider: UISlider!
-    @IBOutlet var audioVisualizer: AudioVisualizer!
+    // Properties
+    
+    // NOTE: We can only play DRM-free music (can't use Apple Music)
+    // Digital Rights Management - encrypted so you can't see actual audio data
+    var audioPlayer: AVAudioPlayer?
     
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
@@ -28,6 +28,13 @@ class AudioRecorderController: UIViewController {
         return formatting
     }()
     
+    // Outlets
+    @IBOutlet var playButton: UIButton!
+    @IBOutlet var recordButton: UIButton!
+    @IBOutlet var timeElapsedLabel: UILabel!
+    @IBOutlet var timeRemainingLabel: UILabel!
+    @IBOutlet var timeSlider: UISlider!
+    @IBOutlet var audioVisualizer: AudioVisualizer!
     
     // MARK: - View Controller Lifecycle
     
@@ -81,10 +88,14 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
+    var isPlaying: Bool {
+        audioPlayer?.isPlaying ?? false  // single line method, you can omit the return
+    }
+
     func loadAudio() {
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
         
-        
+        audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
     }
     
     /*
@@ -96,11 +107,11 @@ class AudioRecorderController: UIViewController {
     */
     
     func play() {
-        
+        audioPlayer?.play()
     }
-    
+
     func pause() {
-        
+        audioPlayer?.pause()
     }
     
     
@@ -161,7 +172,11 @@ class AudioRecorderController: UIViewController {
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
-        
+        if isPlaying {
+            pause()
+        } else {
+            play()
+        }
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
