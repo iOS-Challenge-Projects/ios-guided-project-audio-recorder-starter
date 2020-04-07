@@ -15,7 +15,11 @@ class AudioRecorderController: UIViewController {
     
     // NOTE: We can only play DRM-free music (can't use Apple Music)
     // Digital Rights Management - encrypted so you can't see actual audio data
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? {
+        didSet {
+            audioPlayer?.delegate = self
+        }
+    }
     
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
@@ -27,6 +31,8 @@ class AudioRecorderController: UIViewController {
         formatting.allowedUnits = [.minute, .second]
         return formatting
     }()
+    
+    private var timer: Timer?
     
     // Outlets
     @IBOutlet var playButton: UIButton!
@@ -53,11 +59,18 @@ class AudioRecorderController: UIViewController {
     
     func updateViews() {
         playButton.isSelected = isPlaying
+        
+        let elapsedTime = audioPlayer?.currentTime ?? 0
+        let duration = audioPlayer?.duration ?? 0
+        timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
+        
+        timeSlider.value = Float(elapsedTime)
+        timeSlider.minimumValue = 0
+        timeSlider.maximumValue = Float(duration)
     }
     
     // MARK: - Timer
     
-    /*
     func startTimer() {
         timer?.invalidate()
         
@@ -66,13 +79,13 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-            if let audioRecorder = self.audioRecorder,
-                self.isRecording == true {
-                
-                audioRecorder.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-                
-            }
+    //            if let audioRecorder = self.audioRecorder,
+    //                self.isRecording == true {
+    //
+    //                audioRecorder.updateMeters()
+    //                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+    //
+    //            }
             
             if let audioPlayer = self.audioPlayer,
                 self.isPlaying == true {
@@ -82,12 +95,12 @@ class AudioRecorderController: UIViewController {
             }
         }
     }
-    
+
     func cancelTimer() {
         timer?.invalidate()
         timer = nil
     }
-    */
+    
     
     
     // MARK: - Playback
@@ -112,11 +125,13 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        startTimer()
         updateViews()
     }
 
     func pause() {
         audioPlayer?.pause()
+        cancelTimer()
         updateViews()
     }
     
@@ -194,3 +209,15 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        updateViews()
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("Audio Player Decode Error: \(error)")
+        }
+        updateViews()
+    }
+}
