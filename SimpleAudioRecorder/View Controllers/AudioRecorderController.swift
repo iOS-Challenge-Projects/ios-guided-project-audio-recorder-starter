@@ -50,10 +50,15 @@ class AudioRecorderController: UIViewController {
                                                           weight: .regular)
         timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
                                                                    weight: .regular)
-        
+        updateViews()
         loadAudio()
     }
     
+    
+    func updateViews() {
+        //Set the state of the button = to isPlaying -> Bool
+        playButton.isSelected = isPlaying
+    }
     
     // MARK: - Timer
     
@@ -108,11 +113,11 @@ class AudioRecorderController: UIViewController {
     */
     
     func play() {
-        
+        audioPlayer?.play()
     }
     
     func pause() {
-        
+        audioPlayer?.pause()
     }
     
     
@@ -175,11 +180,12 @@ class AudioRecorderController: UIViewController {
     @IBAction func togglePlayback(_ sender: Any) {
         
         if isPlaying{
-            audioPlayer?.pause()
+            pause()
         }else{
-            audioPlayer?.play()
+            play()
         }
         
+        updateViews()
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
