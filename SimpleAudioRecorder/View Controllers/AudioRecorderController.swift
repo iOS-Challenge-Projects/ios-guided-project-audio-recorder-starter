@@ -7,8 +7,19 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
+    
+    //MARK: - Properties
+    private var audioPlayer: AVAudioPlayer?
+    
+    private var isPlaying: Bool {
+        //give default value of false since is an optional
+        audioPlayer?.isPlaying  ?? false
+    }
+    
+    //MARK: - Outlets
     
     @IBOutlet var playButton: UIButton!
     @IBOutlet var recordButton: UIButton!
@@ -82,8 +93,9 @@ class AudioRecorderController: UIViewController {
     // MARK: - Playback
     
     func loadAudio() {
-        let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
+        guard let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3") else {return}
         
+        audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
         
     }
     
@@ -161,6 +173,12 @@ class AudioRecorderController: UIViewController {
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
+        
+        if isPlaying{
+            audioPlayer?.pause()
+        }else{
+            audioPlayer?.play()
+        }
         
     }
     
