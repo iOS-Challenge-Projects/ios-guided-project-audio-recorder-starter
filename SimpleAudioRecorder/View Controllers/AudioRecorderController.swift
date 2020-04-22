@@ -13,6 +13,7 @@ class AudioRecorderController: UIViewController {
     
     //MARK: - Properties
     private var audioRecoreder: AVAudioRecorder?
+    
     private var isRecording: Bool {
         //give default value of false since is an optional
         audioRecoreder?.isRecording  ?? false
@@ -66,12 +67,15 @@ class AudioRecorderController: UIViewController {
                                                                    weight: .regular)
         updateViews()
         loadAudio()
+        
+        try? prepareAudioSession()
     }
     
     
     func updateViews() {
         //Set the state of the button = to isPlaying -> Bool
         playButton.isSelected = isPlaying
+        recordButton.isSelected = isRecording
         
         //Update the Start label to show the timer
         let elapsedTime = audioPlayer?.currentTime ?? 0
@@ -126,16 +130,18 @@ class AudioRecorderController: UIViewController {
         guard let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3") else {return}
         
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
+        //Enable audio animation
+        audioPlayer?.isMeteringEnabled = true
         
     }
     
-    /*
+ 
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
         try session.setActive(true, options: []) // can fail if on a phone call, for instance
     }
-    */
+ 
     
     func play() {
         audioPlayer?.play()
@@ -161,7 +167,6 @@ class AudioRecorderController: UIViewController {
         return file
     }
     
- 
     func requestPermissionOrStartRecording() {
         switch AVAudioSession.sharedInstance().recordPermission {
         case .undetermined:
@@ -193,7 +198,6 @@ class AudioRecorderController: UIViewController {
         }
     }
  
-    
     func startRecording() {
        let recordingURL = createNewRecordingURL()
         
@@ -231,7 +235,11 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func updateCurrentTime(_ sender: UISlider) {
-        
+        if isPlaying{
+            pause()
+        }
+        audioPlayer?.currentTime = TimeInterval(timeSlider.value)
+        updateViews()
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
@@ -243,6 +251,7 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+//MARK: - AVAudioPlayerDelegate
 extension AudioRecorderController: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         //Call updateViews so when the audio finishes it switches the play button from pause back to play
@@ -256,12 +265,13 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
     }
 }
 
-
+//MARK: - AVAudioRecorderDelegate
 extension AudioRecorderController: AVAudioRecorderDelegate {
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         
         //FIXME: Create a do/catch block
+        //Setup play to play the last recording
         if let recordingURL = recordingURL {
             audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL)
         }
