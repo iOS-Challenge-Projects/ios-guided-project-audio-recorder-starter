@@ -12,12 +12,18 @@ import AVFoundation
 class AudioRecorderController: UIViewController {
     
     //MARK: - Properties
-    private var audioPlayer: AVAudioPlayer?
+    private var audioPlayer: AVAudioPlayer? {
+        didSet {
+            audioPlayer?.delegate = self
+        }
+    }
     
     private var isPlaying: Bool {
         //give default value of false since is an optional
         audioPlayer?.isPlaying  ?? false
     }
+    
+    private var timer: Timer?
     
     //MARK: - Outlets
     
@@ -58,11 +64,24 @@ class AudioRecorderController: UIViewController {
     func updateViews() {
         //Set the state of the button = to isPlaying -> Bool
         playButton.isSelected = isPlaying
+        
+        //Update the Start label to show the timer
+        let elapsedTime = audioPlayer?.currentTime ?? 0
+        timeElapsedLabel.text = timeIntervalFormatter.string(from: elapsedTime)
+        
+        
+        //Setupslider / progress bar
+        timeSlider.value = Float(elapsedTime)
+        timeSlider.minimumValue = 0 //Start
+        let duration = audioPlayer?.duration ?? 0
+        timeSlider.maximumValue = Float(duration)//Ends
+        
+ 
     }
     
     // MARK: - Timer
     
-    /*
+ 
     func startTimer() {
         timer?.invalidate()
         
@@ -71,13 +90,13 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-            if let audioRecorder = self.audioRecorder,
-                self.isRecording == true {
-                
-                audioRecorder.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-                
-            }
+//            if let audioRecorder = self.audioRecorder,
+//                self.isRecording == true {
+//
+//                audioRecorder.updateMeters()
+//                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+//
+//            }
             
             if let audioPlayer = self.audioPlayer,
                 self.isPlaying == true {
@@ -92,7 +111,7 @@ class AudioRecorderController: UIViewController {
         timer?.invalidate()
         timer = nil
     }
-    */
+ 
     
     
     // MARK: - Playback
@@ -114,10 +133,12 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        startTimer()
     }
     
     func pause() {
         audioPlayer?.pause()
+        cancelTimer()
     }
     
     
@@ -197,3 +218,15 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        //Call updateViews so when the audio finishes it switches the play button from pause back to play
+        updateViews()
+    }
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("Error decoding audio \(error)")
+        }
+        updateViews()
+    }
+}
