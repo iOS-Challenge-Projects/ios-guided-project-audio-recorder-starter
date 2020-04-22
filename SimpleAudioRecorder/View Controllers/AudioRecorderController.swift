@@ -22,6 +22,8 @@ class AudioRecorderController: UIViewController {
     private var audioPlayer: AVAudioPlayer? {
         didSet {
             audioPlayer?.delegate = self
+            //Enable audio animation
+            audioPlayer?.isMeteringEnabled = true
         }
     }
     
@@ -130,8 +132,7 @@ class AudioRecorderController: UIViewController {
         guard let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3") else {return}
         
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
-        //Enable audio animation
-        audioPlayer?.isMeteringEnabled = true
+
         
     }
     
@@ -209,6 +210,7 @@ class AudioRecorderController: UIViewController {
         }catch{
             print("Error Recording audio: \(error)")
         }
+        audioRecoreder?.record()
         audioRecoreder?.delegate = self
         
         updateViews()
