@@ -41,6 +41,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		047D71B924505FB500F6ABBD /* Storyboard */ = {
+			isa = PBXGroup;
+			children = (
+				BD8D4B7D2343EB38001432F7 /* Main.storyboard */,
+			);
+			path = Storyboard;
+			sourceTree = "<group>";
+		};
+		047D71BA24505FCA00F6ABBD /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				BD8D4B7E2343EB38001432F7 /* AudioRecorderController.swift */,
+			);
+			path = "View Controllers";
+			sourceTree = "<group>";
+		};
+		047D71BB24505FD800F6ABBD /* Model Controller */ = {
+			isa = PBXGroup;
+			children = (
+				874D724723D1537A006F83B9 /* AudioVisualizer.swift */,
+			);
+			path = "Model Controller";
+			sourceTree = "<group>";
+		};
 		BD8D4B5D2343EB1D001432F7 = {
 			isa = PBXGroup;
 			children = (
@@ -62,9 +86,9 @@
 			children = (
 				BD8D4B692343EB1D001432F7 /* AppDelegate.swift */,
 				BD8D4B6B2343EB1D001432F7 /* SceneDelegate.swift */,
-				BD8D4B7E2343EB38001432F7 /* AudioRecorderController.swift */,
-				874D724723D1537A006F83B9 /* AudioVisualizer.swift */,
-				BD8D4B7D2343EB38001432F7 /* Main.storyboard */,
+				047D71BA24505FCA00F6ABBD /* View Controllers */,
+				047D71BB24505FD800F6ABBD /* Model Controller */,
+				047D71B924505FB500F6ABBD /* Storyboard */,
 				BD8D4B722343EB1E001432F7 /* Assets.xcassets */,
 				BD8D4BA52343ECF5001432F7 /* piano.mp3 */,
 				BD8D4B742343EB1E001432F7 /* LaunchScreen.storyboard */,
@@ -285,7 +309,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N3P8URX7UV;
 				INFOPLIST_FILE = SimpleAudioRecorder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -303,7 +327,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N3P8URX7UV;
 				INFOPLIST_FILE = SimpleAudioRecorder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
